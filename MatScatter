@@ -1,0 +1,65 @@
+using UnityEngine;
+using UnityEditor;
+using System.Collections.Generic;
+
+public class MatScatter : MonoBehaviour
+{
+    public List<GameObject> parentObjects = new List<GameObject>();
+    public List<Material> materials = new List<Material>();
+
+    void Start()
+    {
+        // Comment out ScatterMaterials() here.
+    }
+
+    // Add this method to scatter materials
+    public void ScatterMaterials()
+    {
+        if (parentObjects == null || parentObjects.Count == 0)
+        {
+            Debug.LogError("No parent objects assigned!");
+            return;
+        }
+
+        if (materials == null || materials.Count == 0)
+        {
+            Debug.LogError("No materials assigned!");
+            return;
+        }
+
+        foreach (var parentObject in parentObjects)
+        {
+            if (parentObject == null)
+            {
+                Debug.LogWarning("Skipping null parent object in the list.");
+                continue;
+            }
+
+            Renderer[] childRenderers = parentObject.GetComponentsInChildren<Renderer>();
+
+            foreach (Renderer renderer in childRenderers)
+            {
+                Material randomMaterial = materials[Random.Range(0, materials.Count)];
+                renderer.material = randomMaterial;
+            }
+        }
+    }
+}
+
+#if UNITY_EDITOR
+[CustomEditor(typeof(MatScatter))]
+public class MatScatterEditor : Editor
+{
+    public override void OnInspectorGUI()
+    {
+        DrawDefaultInspector();
+
+        MatScatter matScatterScript = (MatScatter)target;
+
+        if (GUILayout.Button("Scatter Materials"))
+        {
+            matScatterScript.ScatterMaterials();
+        }
+    }
+}
+#endif
